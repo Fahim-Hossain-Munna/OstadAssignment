@@ -3,7 +3,7 @@ import Todo from './components/Todo.vue';
 </script>
 
 <template>
-  <div>
+  <div class="w-[1280px] m-auto">
     <Todo/>
   </div>
 </template>
