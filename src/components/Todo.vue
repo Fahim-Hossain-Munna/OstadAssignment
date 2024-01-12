@@ -131,7 +131,7 @@
             </td>
             </tr>
             <tr v-if="todos.length < 1">
-                <td colspan="4" class="p-5 text-sm text-rose-800 text-center">No Data Found</td>
+                <td colspan="5" class="p-5 text-sm text-rose-800 text-center">No Data Found</td>
             </tr>
         </tbody>
         </table>
