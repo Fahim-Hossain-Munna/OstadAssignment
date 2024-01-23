@@ -1,49 +1,73 @@
 <script setup>
-    import { ref } from 'vue';
+    import { ref , reactive } from 'vue';
 
-    let inputValue = ref("")
-    let inputValueNum = ref("")
+    let inputValueName = ref("")
+    let findTodo = ref("")
+    let inputValueEmail = ref("")
+    let inputValueCity = ref("")
     let showPopvariable = ref(false)
     const resetInput = () => {
-      inputValue = '';
-      inputValueNum = '';
+        inputValueName = '';
+        inputValueEmail = '';
+        inputValueCity = '';
     };
 
-    const todos = ref([
-        {
-            id : 1,
-            task : "task 1",
-            time : 60,
-            status : true
-        },
-        {
-            id : 2,
-            task : "task 2",
-            time : 70,
-            status : false
-        },
-        {
-            id : 3,
-            task : "task 3",
-            time : 80,
-            status : false
-        },
-    ])
+    const todos = reactive([])
+
+
+    const getDataFromApi = () => {
+        fetch('https://jsonplaceholder.typicode.com/users').then(res => res.json()).then(data => {
+            todos.value = data
+        })
+    }
+
+    const userFetch = ()=>{
+        if(findTodo.value){
+            return todos.value.filter((todo)=>{
+                if(todo.name.toLowerCase().includes(findTodo.value.toLowerCase())){
+                    return todo
+                }
+            })
+        }else{
+            return todos.value
+        }
+    }
+    function searchTodo(){
+        if(findTodo.value){
+            return todos.value.filter((todo)=>{
+                if(todo.name.toLowerCase().includes(findTodo.value.toLowerCase())){
+                    return todo
+                }
+        })
+    }
+    }
+
+    getDataFromApi()
 
     function addTodo(){
         let con = confirm('are you want to add item')
         if(con){
             todos.value.push({
-                task : inputValue,
-                time : inputValueNum,
-                status : false
+                name : inputValueName,
+                email : inputValueEmail,
+                address : {
+                    city : inputValueCity
+                }
             })
             resetInput()
             closePop()
         }
     }
-    let removeTodo = (i)=> {;
-        todos.value.splice(i,1)
+
+
+    let removeTodo = (i)=> {
+        // data splice
+        // todos.value.splice(i, 1);
+        // data filtering
+        let filterLoop = todos.value.filter((_, index) => index != i)
+
+        todos.value = filterLoop;
+
         // resetInput()
     }
     let showPop = ()=>{
@@ -79,11 +103,15 @@
                 <form class="space-y-4" action="#">
                     <div>
                         <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Task Name</label>
-                        <input v-model="inputValue" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="write down your task" required>
+                        <input v-model="inputValueName" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="write down your task name" required>
                     </div>
                     <div>
-                        <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Task Time</label>
-                        <input v-model="inputValueNum" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="write down your task time" required>
+                        <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Task Email</label>
+                        <input v-model="inputValueEmail" type="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="write down your task email" required>
+                    </div>
+                    <div>
+                        <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Task City</label>
+                        <input v-model="inputValueCity" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="write down your task city" required>
                     </div>
                     <button @click="addTodo" type="submit" class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">push to your database</button>
                 </form>
@@ -96,6 +124,10 @@
     <!-- END -->
     <div class="text-center my-2 text-xl">
         <h2>Todo Application</h2>
+    </div>
+    <div class="flex justify-center gap-1">
+        <input type="text" class="border px-2 py-3" v-model="findTodo">
+        <button class="bg-black text-white px-3 py-3" @click="searchTodo">search</button>
     </div>
     <div class="flex justify-center my-5">
         <button class="bg-green-950 text-neutral-50 px-5 py-3 flex justify-center align-middle" @click="showPop">
@@ -117,11 +149,11 @@
             </tr>
         </thead>
         <tbody>
-            <tr v-for="(todo,index) in todos" :key="todo.id">
+            <tr v-for="(todo,index) in userFetch()" :key="todo.id">
             <td class="p-5 text-sm border text-center">{{ index+1 }}</td>
-            <td class="p-5 text-sm border text-center">{{ todo.task }}</td>
-            <td class="p-5 text-sm border text-center">{{ todo.time }}</td>
-            <td v-text="todo.status === false ? 'Not Done' : 'Done'" class="p-5 text-sm border text-center"></td>
+            <td class="p-5 text-sm border text-center">{{ todo.name }}</td>
+            <td class="p-5 text-sm border text-center">{{ todo.email }}</td>
+            <td class="p-5 text-sm border text-center">{{ todo.address.city }}</td>
             <td class="p-5 text-sm border text-center">
                 <button class="bg-red-950 text-neutral-50 px-1.5 py-1.5" @click="removeTodo(index)">
                     <i class="material-symbols-outlined">
@@ -130,7 +162,7 @@
                 </button>
             </td>
             </tr>
-            <tr v-if="todos.length < 1">
+            <tr v-if="todos.length < 0">
                 <td colspan="5" class="p-5 text-sm text-rose-800 text-center">No Data Found</td>
             </tr>
         </tbody>
